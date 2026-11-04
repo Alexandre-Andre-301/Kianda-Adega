@@ -16,6 +16,7 @@ export const FILTROS = ['Todos', 'Tinto', 'Branco', 'Verde', 'Rosé', 'Espumante
 export type Filtro = typeof FILTROS[number];
 
 export const MAX_POR_LINHA = 8;
+export const MAX_LINHAS = 5;
 
 export const FEATURED = ['Barca Velha', "Blandy's Bual 5 Anos", 'Periquita Tinto'];
 

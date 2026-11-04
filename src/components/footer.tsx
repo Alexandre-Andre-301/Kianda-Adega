@@ -3,7 +3,7 @@ export function Footer() {
     <footer>
       <span className="fm">SUPERMERCADO KIANDA</span>
       <div className="links">
-        <a>Privacidade</a><a>Termos</a><a>Ajuda</a><a>Sobre a Adega</a>
+        <span>Privacidade</span><span>Termos</span><span>Ajuda</span><span>Sobre a Adega</span>
       </div>
       <span>© 2026 · Adega Digital · Demo</span>
     </footer>

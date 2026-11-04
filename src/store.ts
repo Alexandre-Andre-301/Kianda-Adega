@@ -27,6 +27,14 @@ export function subscribe(cb: () => void) { listeners.add(cb); return () => { li
 export function getSnapshot() { return vinhos; }
 export function useVinhos() { return useSyncExternalStore(subscribe, getSnapshot); }
 
+window.addEventListener('storage', (e) => {
+  if (e.key !== KEY) return;
+  try {
+    const p = e.newValue ? JSON.parse(e.newValue) : null;
+    if (Array.isArray(p)) { vinhos = p as Wine[]; emit(); }
+  } catch { /* ignora */ }
+});
+
 export function countInLine(coluna: Regiao, linha: number, exceptId?: string) {
   return vinhos.filter(v => v.coluna === coluna && v.linha === linha && v.id !== exceptId).length;
 }

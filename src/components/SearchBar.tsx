@@ -13,7 +13,7 @@ export function SearchBar({ q, setQ, filtro, setFiltro }: Props) {
   const [showFilters, setShowFilters] = useState(false);
   return (
     <>
-      <div className="searchbar">
+      <div className="searchbar" role="search" aria-label="Pesquisar e filtrar vinhos">
         <svg className="mag" width="20" height="20" viewBox="0 0 24 24" fill="none"
           stroke="currentColor" strokeWidth="2" strokeLinecap="round">
           <circle cx="11" cy="11" r="7" /><path d="m20 20-3.2-3.2" />
@@ -22,7 +22,7 @@ export function SearchBar({ q, setQ, filtro, setFiltro }: Props) {
           value={q}
           onChange={e => setQ(e.target.value)}
           type="search"
-          placeholder="Escreva o nome, região ou casta…  ex: Château Margaux, Douro, Malbec"
+          placeholder="Escreva o nome, tipo ou região…  ex: Barca Velha, Porto, Alentejo"
           autoComplete="off"
           aria-label="Pesquisar vinho"
         />

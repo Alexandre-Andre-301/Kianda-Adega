@@ -1,20 +1,46 @@
+import * as Dialog from '@radix-ui/react-dialog';
+import { Link } from 'react-router-dom';
+
+const IconeMenu = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+    <path d="M4 6h16M4 12h16M4 18h16" />
+  </svg>
+);
+
+const Item = ({ to, hash, children }: { to?: string; hash?: string; children: string }) => (
+  <Dialog.Close asChild>
+    {to ? <Link to={to}>{children}</Link> : <a href={hash}>{children}</a>}
+  </Dialog.Close>
+);
+
 export function Navbar() {
   return (
     <nav>
       <div className="wordmark">KIANDA<span>·Adega</span></div>
+
       <div className="navlinks">
-        <a className="active">Vinhos</a>
-        <a>Sugestões</a>
-        <a>Ajuda</a>
-        <a href="/admin">Admin</a>
+        <Link to="/" className="active">Vinhos</Link>
+        <a href="#sugestoes">Sugestões</a>
+        <Link to="/admin">Admin</Link>
       </div>
+
       <div className="navicons">
-        <button title="Ajuda" aria-label="Ajuda">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-            <circle cx="12" cy="12" r="9" /><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.8.4-1 .8-1 1.7" />
-            <circle cx="12" cy="17" r=".6" fill="currentColor" />
-          </svg>
-        </button>
+        <Dialog.Root>
+          <Dialog.Trigger className="menu-btn" aria-label="Abrir menu">
+            <IconeMenu />
+          </Dialog.Trigger>
+          <Dialog.Portal>
+            <Dialog.Overlay className="overlay" />
+            <Dialog.Content className="menu-sheet">
+              <Dialog.Title className="menu-titulo">Navegação</Dialog.Title>
+              <div className="menu-ligacoes">
+                <Item to="/">Vinhos</Item>
+                <Item hash="#sugestoes">Sugestões</Item>
+                <Item to="/admin">Admin</Item>
+              </div>
+            </Dialog.Content>
+          </Dialog.Portal>
+        </Dialog.Root>
       </div>
     </nav>
   );

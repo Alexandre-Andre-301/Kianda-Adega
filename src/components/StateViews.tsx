@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react';
+
 export function NotFound() {
   return (
     <div className="notfound">
@@ -12,7 +14,6 @@ export function NotFound() {
     </div>
   );
 }
-import { useEffect, useState } from 'react';
 
 const CURIOSIDADES = [
   'Portugal tem mais de 250 castas autóctones — uma das maiores diversidades do mundo.',
@@ -35,15 +36,18 @@ export function EmptyPrompt() {
 
   useEffect(() => {
     const reduz = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    let troca: ReturnType<typeof setTimeout> | undefined;
+
     const id = setInterval(() => {
       if (reduz) {
         setI(v => (v + 1) % CURIOSIDADES.length);
       } else {
         setVisible(false);
-        setTimeout(() => { setI(v => (v + 1) % CURIOSIDADES.length); setVisible(true); }, 400);
+        troca = setTimeout(() => { setI(v => (v + 1) % CURIOSIDADES.length); setVisible(true); }, 400);
       }
     }, 6000);
-    return () => clearInterval(id);
+
+    return () => { clearInterval(id); clearTimeout(troca); };
   }, []);
 
   return (

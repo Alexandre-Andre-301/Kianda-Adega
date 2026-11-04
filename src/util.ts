@@ -4,7 +4,7 @@ import { FEATURED } from './data';
 
 export const fmtKz = (n: number) => n.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 
-const belongs = (v: Wine, f: Filtro) => (f === 'Todos' ? true : v.tipo === f);
+export const belongs = (v: Wine, f: Filtro) => (f === 'Todos' ? true : v.tipo === f);
 
 const scoreWine = (v: Wine, q: string) => {
   const n = v.nome.toLowerCase();
@@ -26,15 +26,16 @@ export function getResults(wines: Wine[], query: string, filtro: Filtro) {
   return { primary: scored.length ? scored[0].v : null, list: scored.map(x => x.v) };
 }
 
-export function suggestionsFor(wines: Wine[], primary: Wine | null): Wine[] {
+export function suggestionsFor(wines: Wine[], primary: Wine | null, filtro: Filtro): Wine[] {
+  const pool = wines.filter(v => belongs(v, filtro));
   if (primary) {
-    return wines
+    return pool
       .filter(v => v.id !== primary.id)
       .map(v => ({ v, s: (v.coluna === primary.coluna ? 2 : 0) + (v.tipo === primary.tipo ? 1 : 0) }))
       .sort((a, b) => b.s - a.s)
       .slice(0, 3)
       .map(x => x.v);
   }
-  const feat = FEATURED.map(nm => wines.find(v => v.nome === nm)).filter((v): v is Wine => Boolean(v));
-  return [...feat, ...wines.filter(v => !feat.includes(v))].slice(0, 3);
+  const feat = FEATURED.map(nm => pool.find(v => v.nome === nm)).filter((v): v is Wine => Boolean(v));
+  return [...feat, ...pool.filter(v => !feat.includes(v))].slice(0, 3);
 }

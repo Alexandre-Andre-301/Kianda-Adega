@@ -5,12 +5,18 @@ interface Props {
   list: Wine[];
   label: string;
   onSelect: (w: Wine) => void;
+  acao?: { texto: string; onClick: () => void };
 }
 
-export function Suggestions({ list, label, onSelect }: Props) {
+export function Suggestions({ list, label, onSelect, acao }: Props) {
   return (
     <>
-      <div className="sec-label">{label} <a className="right">Ver todos</a></div>
+      <div className="sec-label" id="sugestoes">
+        {label}
+        {acao && (
+          <button type="button" className="right" onClick={acao.onClick}>{acao.texto}</button>
+        )}
+      </div>
       <div className="sugs">
         {list.map(v => (
           <button key={v.id} className="sug" onClick={() => onSelect(v)}>

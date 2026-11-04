@@ -1,14 +1,18 @@
-import { useEffect, useState } from 'react';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { Cliente } from './components/Cliente';
 import { Admin } from './components/admin/Admin';
+import { ToastProvider } from './ui/Toast';
 
 export default function App() {
-  const [hash, setHash] = useState(window.location.hash);
-  useEffect(() => {
-    const f = () => setHash(window.location.hash);
-    window.addEventListener('hashchange', f);
-    return () => window.removeEventListener('hashchange', f);
-  }, []);
-
-  return hash.startsWith('/admin') ? <Admin /> : <Cliente />;
+  return (
+    <ToastProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Cliente />} />
+          <Route path="/admin" element={<Admin />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </BrowserRouter>
+    </ToastProvider>
+  );
 }
