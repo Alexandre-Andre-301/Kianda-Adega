@@ -5,7 +5,7 @@ import { useVinhos, removeVinho, resetVinhos } from '../../store';
 import { fmtKz } from '../../util';
 import { ConfirmDialog } from '../../ui/ConfirmDialog';
 import { useToast } from '../../ui/toast-context';
-import type { Wine } from '../../types';
+import type { Regiao, Wine } from '../../types';
 import { WineForm } from './WineForm';
 
 type Confirmo =
@@ -21,6 +21,7 @@ export function AdminPanel({ onLogout }: { onLogout: () => void }) {
   const [editing, setEditing] = useState<Wine | null | undefined>(undefined);
   const [confirmo, setConfirmo] = useState<Confirmo>(null);
   const [gatilho, setGatilho] = useState<HTMLElement | null>(null);
+  const [coluna, setColuna] = useState<Regiao | 'Todas'>('Todas');
   const addRef = useRef<HTMLButtonElement>(null);
 
   const abrirForm = (e: ReactMouse<HTMLElement>, vinho: Wine | null) => {
@@ -33,10 +34,21 @@ export function AdminPanel({ onLogout }: { onLogout: () => void }) {
   };
 
   const filtrados = useMemo(() => {
+    const naColuna = coluna === 'Todas' ? wines : wines.filter(v => v.coluna === coluna);
     const s = q.trim().toLowerCase();
-    if (!s) return wines;
-    return wines.filter(v => (v.nome + ' ' + v.tipo + ' ' + v.coluna).toLowerCase().includes(s));
-  }, [wines, q]);
+    if (!s) return naColuna;
+    return naColuna.filter(v => (v.nome + ' ' + v.tipo + ' ' + v.coluna).toLowerCase().includes(s));
+  }, [wines, q, coluna]);
+
+  const disponiveis = useMemo(() => wines.filter(v => v.disponivel).length, [wines]);
+
+  const colunas = useMemo(() => {
+    const marca = new Map<Regiao, number>();
+    for (const v of wines) marca.set(v.coluna, (marca.get(v.coluna) ?? 0) + 1);
+    return [...marca]
+      .map(([nome, n]) => ({ nome, n }))
+      .sort((a, b) => b.n - a.n || a.nome.localeCompare(b.nome));
+  }, [wines]);
 
   const executarConfirmo = () => {
     if (confirmo?.tipo === 'remover') {
@@ -58,7 +70,31 @@ export function AdminPanel({ onLogout }: { onLogout: () => void }) {
           <div className="side-sub">Gestão da Adega</div>
         </div>
         <button ref={addRef} className="add-btn" onClick={e => abrirForm(e, null)}>+ Adicionar vinho</button>
-        <nav className="side-nav"><a className="active">Inventário</a></nav>
+
+        <div className="side-sec">
+          <div className="side-label">Adega</div>
+          <dl className="side-stats">
+            <div><dt>Vinhos</dt><dd>{wines.length}</dd></div>
+            <div><dt>Disponíveis</dt><dd className="is-ok">{disponiveis}</dd></div>
+            <div><dt>Esgotados</dt><dd className={wines.length - disponiveis ? 'is-out' : ''}>{wines.length - disponiveis}</dd></div>
+          </dl>
+        </div>
+
+        <div className="side-sec side-sec-cols">
+          <div className="side-label">Colunas</div>
+          <div className="side-cols" role="group" aria-label="Filtrar inventário por coluna">
+            <button className={`col-btn${coluna === 'Todas' ? ' on' : ''}`} aria-pressed={coluna === 'Todas'}
+              onClick={() => setColuna('Todas')}>
+              <span className="col-nome">Todas</span><span className="col-n">{wines.length}</span>
+            </button>
+            {colunas.map(c => (
+              <button key={c.nome} className={`col-btn${coluna === c.nome ? ' on' : ''}`}
+                aria-pressed={coluna === c.nome} onClick={() => setColuna(c.nome)}>
+                <span className="col-nome">{c.nome}</span><span className="col-n">{c.n}</span>
+              </button>
+            ))}
+          </div>
+        </div>
         <div className="side-foot">
           <Link className="side-link" to="/">Ver site público</Link>
           <button className="side-link" onClick={e => abrirConfirmo(e, { tipo: 'repor' })}>Repor demo</button>
@@ -77,7 +113,11 @@ export function AdminPanel({ onLogout }: { onLogout: () => void }) {
           <input value={q} onChange={e => setQ(e.target.value)} placeholder="Procurar por nome, tipo ou região…" aria-label="Procurar vinho no inventário" />
         </div>
 
-        <p className="wcount" aria-live="polite">{filtrados.length} de {wines.length} vinhos</p>
+        <p className="wcount" aria-live="polite">
+          {filtrados.length} de {wines.length} vinhos
+          {coluna !== 'Todas' && <> · coluna {coluna}</>}
+          {q.trim() && <> · “{q.trim()}”</>}
+        </p>
 
         <div className="wtable-wrap">
           <table className="wtable">
@@ -100,8 +140,12 @@ export function AdminPanel({ onLogout }: { onLogout: () => void }) {
               ))}
               {filtrados.length === 0 && (
                 <tr><td colSpan={5} className="wempty">
-                  Nenhum vinho corresponde a “{q}”.
-                  <button className="limpar" onClick={() => setQ('')}>Limpar procura</button>
+                  {coluna !== 'Todas' && q.trim()
+                    ? <>Nenhum vinho em {coluna} corresponde a “{q.trim()}”.</>
+                    : coluna !== 'Todas'
+                      ? <>A coluna {coluna} está vazia.</>
+                      : <>Nenhum vinho corresponde a “{q.trim()}”.</>}
+                  <button className="limpar" onClick={() => { setQ(''); setColuna('Todas'); }}>Limpar filtros</button>
                 </td></tr>
               )}
             </tbody>
